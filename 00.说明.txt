@@ -1,0 +1,21 @@
+NoSQL存储
+MongoDB(文档数据库)
+Neo4j(图形数据库)
+Redis(键/值存储)
+Hbase(列族数据库)
+
+
+SpringData项目所支持的关系数据存储技术
+-JDBC
+-JPA
+
+-----------------------------------
+一.
+	1.加入jar
+		Spring,hibernate,hibernate-jpa,c3po,mysql驱动
+		Spring-data(spring-data-commons、Spring-data-jpa)
+	2.建立 Spring配置文件: applicationContext.xml
+		spring bean Definition file(命名空间beans,context,tx)
+		
+	3.编写 ：applicationContext.xml,编写测试类
+	

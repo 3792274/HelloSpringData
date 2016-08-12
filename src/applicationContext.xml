@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.8.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+
+	<!-- Hibernate5 有问题。 -->
+
+
+	<!-- -配置自动扫描的包,@services -->
+	<context:component-scan base-package="com.atguigu.springdata"  /> 
+
+
+
+	<!-- 1.配置数据源 _C3p0，外置化，db.properties，执行测试 -->
+	<context:property-placeholder  location="classpath:db.properties" />  
+	
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="user" value="${jdbc.user}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="driverClass" value="${jdbc.driverClass}"></property>
+		<property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+	</bean>
+	
+	
+	
+	<!-- 2.配置JPA的EntityManagerFactory (使用Spring管理)，执行测试-->
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="jpaVendorAdapter"> <!-- Jpa实现产品，通常是一个内部Bean -->
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="generateDdl" value="false" />
+			</bean>
+		</property>
+        
+		<!-- jpa实现产品的属性 -->
+		<property name="jpaProperties">
+			<props>
+				<!-- 二级缓存相关 -->
+				<!--  
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+				<prop key="net.sf.ehcache.configurationResourceName">ehcache-hibernate.xml</prop>
+				<prop key="hibernate.cache.use_second_level_cache">${hibernate.cache.use_second_level_cache}</prop>
+				-->
+				<!-- 生成的数据表的列的映射策略 -->
+				<prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+					<!-- hibernate 基本属性 -->
+					<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+					<prop key="hibernate.show_sql">true</prop>
+					<prop key="hibernate.format_sql">true</prop>
+					<prop key="hibernate.hbm2ddl.auto">update</prop>
+					<prop key="hibernate.connection.isolation">2</prop>
+					<prop key="javax.persistence.validation.mode">none</prop>
+			</props>
+		</property>
+		<property name="packagesToScan" value="com.atguigu.springdata"></property> <!-- 配置要扫描@Entity注解的包 -->
+	</bean>
+	
+	
+	<!-- 3.配置事务管理器,jpaTransactionManager,无测试 -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>
+	
+	
+	<!-- 4.配置支持注解的事务,@Transactional,jpaTransactionManager -->
+	<tx:annotation-driven transaction-manager="transactionManager"   />	
+	
+	
+	<!-- 5.配置SpringData ,编写PersonRepository接口-->
+	<!-- 5.1要加入jpa的命名空间,applicationContext.xml中 -->
+    <!-- 5.2 base-package: 扫描 Repository Bean 所在的 package，如 extends Repository<Persion,Integer> 或者 加上@RepositoryDefinition 注解-->
+	<jpa:repositories base-package="com.atguigu.springdata"  entity-manager-factory-ref="entityManagerFactory"  />  
+	
+		
+	
+	
+	
+	
+
+
+</beans> 
